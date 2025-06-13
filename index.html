@@ -146,107 +146,72 @@
     </style>
 </head>
 <body>
-    <div id="cadastroContainer" class="container" style="max-width:400px;display:none;">
-        <h1>Cadastrar Usuário</h1>
-        <form id="cadastroForm">
+    <div id="mainApp" class="container">
+        <h1>Cadastro de Mercadorias</h1>
+        <form id="mercadoriaForm">
             <div class="form-group">
-                <label for="cadastroUsuario">Usuário</label>
-                <input type="text" id="cadastroUsuario" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="cadastroSenha">Senha</label>
-                <input type="password" id="cadastroSenha" required autocomplete="new-password">
-            </div>
-            <div class="form-actions">
-                <button type="submit">Cadastrar</button>
-                <button type="button" id="irParaLogin" style="background:#1976d2;">Ir para Login</button>
-            </div>
-        </form>
-    </div>
-    <div id="loginContainer" class="container" style="max-width:400px;display:none;">
-        <h1>Login</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="loginUsuario">Usuário</label>
-                <input type="text" id="loginUsuario" required autocomplete="username">
+                <label for="apartamento">Apartamento</label>
+                <input type="text" id="apartamento" required>
             </div>
             <div class="form-group">
-                <label for="loginSenha">Senha</label>
-                <input type="password" id="loginSenha" required autocomplete="current-password">
+                <label for="datahora">Data e Hora</label>
+                <input type="datetime-local" id="datahora" required>
             </div>
-            <div class="form-actions">
-                <button type="submit">Entrar</button>
+            <div class="form-group">
+                <label for="remetente">Remetente</label>
+                <input type="text" id="remetente" required>
             </div>
-        </form>
-    </div>
-    <div id="mainApp" style="display:none;">
-        <div class="container">
-            <h1>Cadastro de Mercadorias</h1>
-            <form id="mercadoriaForm">
-                <div class="form-group">
-                    <label for="apartamento">Apartamento</label>
-                    <input type="text" id="apartamento" required>
-                </div>
-                <div class="form-group">
-                    <label for="datahora">Data e Hora</label>
-                    <input type="datetime-local" id="datahora" required>
-                </div>
-                <div class="form-group">
-                    <label for="remetente">Remetente</label>
-                    <input type="text" id="remetente" required>
-                </div>
-                <div class="form-group">
-                    <label for="destinatario">Destinatário</label>
-                    <input type="text" id="destinatario" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" required>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Retirada">Retirada</option>
-                        <option value="Cancelado">Cancelado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="observacao">Observação</label>
-                    <textarea id="observacao" rows="2"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="foto">Foto da Mercadoria</label>
-                    <input type="file" id="foto" accept="image/*" capture="environment">
-                    <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Tirar Foto</button>
-                    <button type="button" id="switchCamera" style="margin-top:8px;background:#007bff;display:none;">Alternar Câmera</button>
-                    <video id="video" width="160" height="120" autoplay style="display:none;margin-top:8px;"></video>
-                    <canvas id="canvas" width="160" height="120" style="display:none;"></canvas>
-                </div>
+            <div class="form-group">
+                <label for="destinatario">Destinatário</label>
+                <input type="text" id="destinatario" required>
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" required>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Retirada">Retirada</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="observacao">Observação</label>
+                <textarea id="observacao" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="foto">Foto da Mercadoria</label>
+                <input type="file" id="foto" accept="image/*" capture="environment">
+                <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Tirar Foto</button>
+                <button type="button" id="switchCamera" style="margin-top:8px;background:#007bff;display:none;">Alternar Câmera</button>
+                <video id="video" width="160" height="120" autoplay style="display:none;margin-top:8px;"></video>
+                <canvas id="canvas" width="160" height="120" style="display:none;"></canvas>
+            </div>
 
-                <div class="form-actions">
-                    <button type="submit">Adicionar</button>
-                </div>
-            </form>
-            <table id="tabelaMercadorias">
-                <thead>
-                    <tr>
-                        <th>Foto</th>
-                        <th>Apartamento</th>
-                        <th>Data/Hora</th>
-                        <th>Remetente</th>
-                        <th>Destinatário</th>
-                        <th>Status</th>
-                        <th>Observação</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div style="margin-top:32px;">
-                <h2>Relatório</h2>
-                <div id="relatorioEntradas">Entradas: 0</div>
-                <div id="relatorioSaidas">Saídas: 0</div>
-                <div id="relatorioCancelados">Cancelados: 0</div>
-                <div id="relatorioRetiradasDetalhes" style="margin-top:16px;"></div>
-                <button id="btnRelatorioCompleto" style="margin-top:18px;background:#1976d2;color:#fff;font-weight:700;border-radius:6px;padding:10px 24px;">Ver Relatório Completo</button>
+            <div class="form-actions">
+                <button type="submit">Adicionar</button>
             </div>
+        </form>
+        <table id="tabelaMercadorias">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Apartamento</th>
+                    <th>Data/Hora</th>
+                    <th>Remetente</th>
+                    <th>Destinatário</th>
+                    <th>Status</th>
+                    <th>Observação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div style="margin-top:32px;">
+            <h2>Relatório</h2>
+            <div id="relatorioEntradas">Entradas: 0</div>
+            <div id="relatorioSaidas">Saídas: 0</div>
+            <div id="relatorioCancelados">Cancelados: 0</div>
+            <div id="relatorioRetiradasDetalhes" style="margin-top:16px;"></div>
+            <button id="btnRelatorioCompleto" style="margin-top:18px;background:#1976d2;color:#fff;font-weight:700;border-radius:6px;padding:10px 24px;">Ver Relatório Completo</button>
         </div>
     </div>
     <div id="modalRelatorio" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
@@ -273,7 +238,7 @@
                     <td data-label="Apartamento">${m.apartamento}</td>
                     <td data-label="Data/Hora">${new Date(m.datahora).toLocaleString('pt-BR')}</td>
                     <td data-label="Remetente">${m.remetente || ''}</td>
-                    <td data-label="Destinatário">${m.destinatario}</td>
+                    <td data-label="Destinatario">${m.destinatario}</td>
                     <td data-label="Status" class="status-${m.status.toLowerCase()}" id="status-${idx}">${m.status}${m.status === 'Retirada' && m.quemRetirou ? `<br><small>Por: ${m.quemRetirou}</small>` : ''}</td>
                     <td data-label="Observação">${m.observacao || ''}</td>
                     <td data-label="Ações">
@@ -489,119 +454,9 @@
             modalRelatorio.style.display = 'none';
         });
 
-        const cadastroContainer = document.getElementById('cadastroContainer');
-        const cadastroForm = document.getElementById('cadastroForm');
-        const irParaLogin = document.getElementById('irParaLogin');
-        const loginContainer = document.getElementById('loginContainer');
-        const mainApp = document.getElementById('mainApp');
-        const loginForm = document.getElementById('loginForm');
-
-
-        // Funções para mostrar telas
-        function mostrarCadastro() {
-            cadastroContainer.style.display = '';
-            loginContainer.style.display = 'none';
-            mainApp.style.display = 'none';
-        }
-        function mostrarApp() {
-            loginContainer.style.display = 'none';
-            mainApp.style.display = '';
-            cadastroContainer.style.display = 'none';
-            localStorage.setItem('logado', 'true');
-            atualizarLogoutBtn(); // Atualiza a visibilidade do botão de logout
-        }
-        function mostrarLogin() {
-            loginContainer.style.display = '';
-            mainApp.style.display = 'none';
-            cadastroContainer.style.display = 'none';
-            localStorage.removeItem('logado');
-            atualizarLogoutBtn(); // Atualiza a visibilidade do botão de logout
-        }
-
-        // Usuários cadastrados (salvos no localStorage)
-        function getUsuarios() {
-            return JSON.parse(localStorage.getItem('usuarios') || '[]');
-        }
-        function setUsuarios(usuarios) {
-            localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        }
-
-        // Lógica inicial para exibir a tela correta (cadastro, login ou app principal)
-        if (!getUsuarios().length) {
-            mostrarCadastro();
-        } else if (localStorage.getItem('logado') === 'true') {
-            mostrarApp();
-        } else {
-            mostrarLogin();
-        }
-
-        // Adiciona botão para cadastrar novo usuário na tela de login (se ainda não existir)
-        let btnNovoCadastro = document.getElementById('btnNovoCadastro');
-        if (!btnNovoCadastro) { // Verifica se o botão já existe para não duplicar
-            btnNovoCadastro = document.createElement('button');
-            btnNovoCadastro.id = 'btnNovoCadastro'; // Adiciona um ID ao botão
-            btnNovoCadastro.textContent = 'Cadastrar Novo Usuário';
-            btnNovoCadastro.type = 'button';
-            btnNovoCadastro.style = 'margin-top:10px;background:#388e3c;color:#fff;font-weight:700;border-radius:6px;padding:8px 18px;';
-            btnNovoCadastro.onclick = function() {
-                mostrarCadastro();
-            };
-            document.getElementById('loginForm').appendChild(btnNovoCadastro);
-        }
-
-        // Evento para cadastro de usuário
-        cadastroForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const usuario = document.getElementById('cadastroUsuario').value.trim();
-            const senha = document.getElementById('cadastroSenha').value;
-            if (!usuario || !senha) {
-                alert('Usuário e senha são obrigatórios para o cadastro.');
-                return;
-            }
-            let usuarios = getUsuarios();
-            if (usuarios.find(u => u.usuario === usuario)) {
-                alert('Usuário já cadastrado!');
-                return;
-            }
-            usuarios.push({ usuario, senha });
-            setUsuarios(usuarios);
-            alert('Usuário cadastrado com sucesso! Faça login.');
-            mostrarLogin();
-        });
-
-        // Evento para ir para a tela de login a partir do cadastro
-        irParaLogin.addEventListener('click', mostrarLogin);
-
-        // Evento para login
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const usuario = document.getElementById('loginUsuario').value.trim();
-            const senha = document.getElementById('loginSenha').value;
-            const usuarios = getUsuarios();
-            if (usuarios.find(u => u.usuario === usuario && u.senha === senha)) {
-                localStorage.setItem('logado', 'true');
-                mostrarApp();
-            } else {
-                alert('Usuário ou senha inválidos!');
-            }
-        });
-
-        // Botão de logout
-        const logoutBtn = document.createElement('button');
-        logoutBtn.textContent = 'Sair';
-        logoutBtn.style = 'background:#d32f2f;color:#fff;position:absolute;top:20px;right:20px;z-index:10;padding:8px 18px;border-radius:6px;font-weight:700;';
-        logoutBtn.onclick = function() {
-            localStorage.removeItem('logado');
-            mostrarLogin();
-        };
-        document.body.appendChild(logoutBtn);
-
-        // Função para atualizar a visibilidade do botão de logout
-        function atualizarLogoutBtn() {
-            logoutBtn.style.display = (localStorage.getItem('logado') === 'true') ? 'block' : 'none';
-        }
-        // Chamada inicial para configurar a visibilidade do botão de logout
-        atualizarLogoutBtn();
+        // Removendo a lógica de login/cadastro e exibindo a aplicação principal diretamente
+        // O elemento #mainApp já está visível por padrão ao carregar, não precisamos de display:none e mudar via JS.
+        // As referências a cadastroContainer, loginContainer, loginForm, etc. e seus listeners foram removidos.
 
         // Renderiza a tabela de mercadorias ao carregar a página
         renderTabela();
