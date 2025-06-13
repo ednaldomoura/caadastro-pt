@@ -195,7 +195,7 @@
                 <tr>
                     <th>Foto</th>
                     <th>Apartamento</th>
-                    <th>Data/Hora</th>
+                    <th>Data/Hora Entrada</th>
                     <th>Remetente</th>
                     <th>Destinatário</th>
                     <th>Status</th>
@@ -236,10 +236,14 @@
                         ${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto">` : ''}
                     </td>
                     <td data-label="Apartamento">${m.apartamento}</td>
-                    <td data-label="Data/Hora">${new Date(m.datahora).toLocaleString('pt-BR')}</td>
+                    <td data-label="Data/Hora Entrada">${new Date(m.datahora).toLocaleString('pt-BR')}</td>
                     <td data-label="Remetente">${m.remetente || ''}</td>
-                    <td data-label="Destinatario">${m.destinatario}</td>
-                    <td data-label="Status" class="status-${m.status.toLowerCase()}" id="status-${idx}">${m.status}${m.status === 'Retirada' && m.quemRetirou ? `<br><small>Por: ${m.quemRetirou}</small>` : ''}</td>
+                    <td data-label="Destinatário">${m.destinatario}</td>
+                    <td data-label="Status" class="status-${m.status.toLowerCase()}" id="status-${idx}">
+                        ${m.status}
+                        ${m.status === 'Retirada' && m.quemRetirou ? `<br><small>Por: ${m.quemRetirou}</small>` : ''}
+                        ${m.status === 'Retirada' && m.datahoraBaixa ? `<br><small>Em: ${new Date(m.datahoraBaixa).toLocaleString('pt-BR')}</small>` : ''}
+                    </td>
                     <td data-label="Observação">${m.observacao || ''}</td>
                     <td data-label="Ações">
                         <button onclick="removerMercadoria(${idx})" style="background:#d32f2f">Excluir</button>
@@ -266,6 +270,7 @@
                 if (!quemRetirou || !quemRetirou.trim()) return; // Valida se o campo não está vazio
                 mercadorias[idx].status = 'Retirada';
                 mercadorias[idx].quemRetirou = quemRetirou.trim();
+                mercadorias[idx].datahoraBaixa = new Date().toISOString(); // Adiciona a data e hora da baixa
                 localStorage.setItem('mercadorias', JSON.stringify(mercadorias));
                 renderTabela();
             }
@@ -357,7 +362,7 @@
             }
 
             const adicionar = (fotoBase64) => {
-                mercadorias.push({ apartamento, datahora, remetente, destinatario, status, observacao, foto: fotoBase64 });
+                mercadorias.push({ apartamento, datahora, remetente, destinatario, status, observacao, foto: fotoBase64, datahoraBaixa: null }); // Inicializa datahoraBaixa como null
                 localStorage.setItem('mercadorias', JSON.stringify(mercadorias));
                 renderTabela();
                 form.reset();
@@ -399,13 +404,20 @@
             if (retiradas.length) {
                 detalhes = `<h3 style='margin:10px 0 5px 0;font-size:1.1em;'>Detalhes das Retiradas</h3>`;
                 detalhes += `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
-                detalhes += `<tr style='background:#f1f5fb;'><th style='padding:6px 4px;'>Data/Hora</th><th style='padding:6px 4px;'>Apartamento</th><th style='padding:6px 4px;'>Destinatário</th><th style='padding:6px 4px;'>Quem Retirou</th></tr>`;
+                detalhes += `<tr style='background:#f1f5fb;'>
+                                <th style='padding:6px 4px;'>Data/Hora Entrada</th>
+                                <th style='padding:6px 4px;'>Apartamento</th>
+                                <th style='padding:6px 4px;'>Destinatário</th>
+                                <th style='padding:6px 4px;'>Quem Retirou</th>
+                                <th style='padding:6px 4px;'>Data/Hora Baixa</th>
+                            </tr>`;
                 retiradas.forEach(m => {
                     detalhes += `<tr>` +
                         `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
                         `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
                         `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
                         `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
+                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
                         `</tr>`;
                 });
                 detalhes += `</table>`;
@@ -417,12 +429,13 @@
         function gerarRelatorioCompleto() {
             let html = `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
             html += `<tr style='background:#f1f5fb;'>
-                <th style='padding:6px 4px;'>Data/Hora</th>
+                <th style='padding:6px 4px;'>Data/Hora Entrada</th>
                 <th style='padding:6px 4px;'>Apartamento</th>
                 <th style='padding:6px 4px;'>Remetente</th>
                 <th style='padding:6px 4px;'>Destinatário</th>
                 <th style='padding:6px 4px;'>Status</th>
                 <th style='padding:6px 4px;'>Quem Retirou</th>
+                <th style='padding:6px 4px;'>Data/Hora Baixa</th>
                 <th style='padding:6px 4px;'>Observação</th>
             </tr>`;
             mercadorias.forEach(m => {
@@ -433,6 +446,7 @@
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.status}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
+                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.observacao || ''}</td>` +
                     `</tr>`;
             });
@@ -453,10 +467,6 @@
         fecharModalRelatorio.addEventListener('click', function() {
             modalRelatorio.style.display = 'none';
         });
-
-        // Removendo a lógica de login/cadastro e exibindo a aplicação principal diretamente
-        // O elemento #mainApp já está visível por padrão ao carregar, não precisamos de display:none e mudar via JS.
-        // As referências a cadastroContainer, loginContainer, loginForm, etc. e seus listeners foram removidos.
 
         // Renderiza a tabela de mercadorias ao carregar a página
         renderTabela();
