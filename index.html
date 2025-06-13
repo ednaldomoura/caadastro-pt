@@ -215,9 +215,11 @@
                     <label for="foto">Foto da Mercadoria</label>
                     <input type="file" id="foto" accept="image/*" capture="environment">
                     <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Tirar Foto</button>
+                    <button type="button" id="switchCamera" style="margin-top:8px;background:#007bff;display:none;">Alternar Câmera</button>
                     <video id="video" width="160" height="120" autoplay style="display:none;margin-top:8px;"></video>
                     <canvas id="canvas" width="160" height="120" style="display:none;"></canvas>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit">Adicionar</button>
                 </div>
@@ -247,7 +249,6 @@
             </div>
         </div>
     </div>
-    <!-- Modal para relatório completo -->
     <div id="modalRelatorio" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
         <div style="background:#fff;padding:24px 18px 18px 18px;border-radius:10px;max-width:98vw;max-height:90vh;overflow:auto;position:relative;">
             <button id="fecharModalRelatorio" style="position:absolute;top:10px;right:10px;background:#d32f2f;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-weight:700;">Fechar</button>
@@ -255,6 +256,7 @@
             <div id="tabelaRelatorioCompleto"></div>
         </div>
     </div>
+
     <script>
         const form = document.getElementById('mercadoriaForm');
         const tabela = document.getElementById('tabelaMercadorias').querySelector('tbody');
@@ -291,62 +293,86 @@
                 renderTabela();
             }
         }
-        window.removerMercadoria = removerMercadoria;
+        window.removerMercadoria = removerMercadoria; // Torna a função acessível globalmente
 
         function darBaixaMercadoria(idx) {
             if (mercadorias[idx].status === 'Pendente') {
                 const quemRetirou = prompt('Informe quem foi que retirou a mercadoria:');
-                if (!quemRetirou || !quemRetirou.trim()) return;
+                if (!quemRetirou || !quemRetirou.trim()) return; // Valida se o campo não está vazio
                 mercadorias[idx].status = 'Retirada';
                 mercadorias[idx].quemRetirou = quemRetirou.trim();
                 localStorage.setItem('mercadorias', JSON.stringify(mercadorias));
                 renderTabela();
             }
         }
-        window.darBaixaMercadoria = darBaixaMercadoria;
+        window.darBaixaMercadoria = darBaixaMercadoria; // Torna a função acessível globalmente
 
         let stream = null;
         let fotoCapturada = '';
+        let currentFacingMode = 'environment'; // 'user' para frontal, 'environment' para traseira
 
         const abrirCameraBtn = document.getElementById('abrirCamera');
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
+        const switchCameraBtn = document.getElementById('switchCamera'); // Referência ao novo botão
 
-        abrirCameraBtn.addEventListener('click', async function() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert('Câmera não suportada neste dispositivo.');
-                return;
+        async function startCamera(facingMode) {
+            // Para qualquer stream de vídeo existente
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
             }
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const constraints = {
+                    video: {
+                        facingMode: facingMode // Define qual câmera usar
+                    }
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
                 video.style.display = 'block';
                 canvas.style.display = 'none';
                 abrirCameraBtn.textContent = 'Capturar Foto';
-                abrirCameraBtn.onclick = function() {
-                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                    canvas.style.display = 'block';
-                    video.style.display = 'none';
-                    abrirCameraBtn.textContent = 'Tirar Outra Foto';
-                    // Salva a foto capturada em base64
-                    fotoCapturada = canvas.toDataURL('image/png');
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                    }
-                    abrirCameraBtn.onclick = function() {
-                        abrirCameraBtn.textContent = 'Capturar Foto';
-                        canvas.style.display = 'none';
-                        video.style.display = 'block';
-                        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-                            stream = s;
-                            video.srcObject = stream;
-                        });
-                        abrirCameraBtn.onclick = arguments.callee;
-                    };
-                };
+                abrirCameraBtn.onclick = capturePhoto; // Define o evento de clique para capturar foto
+                switchCameraBtn.style.display = 'inline-block'; // Mostra o botão de alternar câmera
             } catch (err) {
-                alert('Erro ao acessar a câmera.');
+                alert('Erro ao acessar a câmera: ' + err.message);
+                console.error('Erro ao acessar a câmera: ', err);
+                video.style.display = 'none'; // Esconde o vídeo se houver erro
+                canvas.style.display = 'none'; // Esconde o canvas se houver erro
+                switchCameraBtn.style.display = 'none'; // Esconde o botão de alternar se houver erro
+                abrirCameraBtn.textContent = 'Tentar Novamente'; // Altera o texto do botão
+                abrirCameraBtn.onclick = () => startCamera(currentFacingMode); // Permite tentar de novo
             }
+        }
+
+        function capturePhoto() {
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'block';
+            video.style.display = 'none';
+            abrirCameraBtn.textContent = 'Tirar Outra Foto';
+            fotoCapturada = canvas.toDataURL('image/png'); // Salva a foto em base64
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop()); // Para o stream da câmera
+            }
+            abrirCameraBtn.onclick = () => {
+                startCamera(currentFacingMode); // Volta a abrir a câmera no modo atual
+            };
+            switchCameraBtn.style.display = 'none'; // Esconde o botão de alternar após capturar
+        }
+
+        // Evento para abrir a câmera
+        abrirCameraBtn.addEventListener('click', function() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Câmera não suportada neste dispositivo.');
+                return;
+            }
+            startCamera(currentFacingMode); // Inicia a câmera no modo atual
+        });
+
+        // Evento para alternar a câmera
+        switchCameraBtn.addEventListener('click', function() {
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+            startCamera(currentFacingMode);
         });
 
         form.addEventListener('submit', function(e) {
@@ -358,9 +384,12 @@
             const status = document.getElementById('status').value;
             const observacao = document.getElementById('observacao').value.trim();
             const fotoInput = document.getElementById('foto');
-            const canvas = document.getElementById('canvas');
             let fotoBase64 = '';
-            if (!apartamento || !datahora || !remetente || !destinatario || !status) return;
+
+            if (!apartamento || !datahora || !remetente || !destinatario || !status) {
+                alert('Por favor, preencha todos os campos obrigatórios (Apartamento, Data/Hora, Remetente, Destinatário, Status).');
+                return;
+            }
 
             const adicionar = (fotoBase64) => {
                 mercadorias.push({ apartamento, datahora, remetente, destinatario, status, observacao, foto: fotoBase64 });
@@ -369,15 +398,17 @@
                 form.reset();
                 canvas.style.display = 'none';
                 document.getElementById('video').style.display = 'none';
-                fotoCapturada = '';
+                fotoCapturada = ''; // Limpa a foto capturada
+                abrirCameraBtn.textContent = 'Tirar Foto'; // Reseta o texto do botão da câmera
+                switchCameraBtn.style.display = 'none'; // Esconde o botão de alternar câmera
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop()); // Para o stream da câmera
+                }
             };
 
-            // Prioridade: foto da câmera > arquivo > nenhuma
+            // Prioridade: foto da câmera capturada > arquivo selecionado > nenhuma
             if (fotoCapturada) {
                 adicionar(fotoCapturada);
-            } else if (canvas.style.display === 'block' && canvas.toDataURL) {
-                fotoBase64 = canvas.toDataURL('image/png');
-                adicionar(fotoBase64);
             } else if (fotoInput.files && fotoInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -385,7 +416,7 @@
                 };
                 reader.readAsDataURL(fotoInput.files[0]);
             } else {
-                adicionar('');
+                adicionar(''); // Adiciona sem foto se nenhuma for fornecida
             }
         });
 
@@ -461,6 +492,10 @@
         const cadastroContainer = document.getElementById('cadastroContainer');
         const cadastroForm = document.getElementById('cadastroForm');
         const irParaLogin = document.getElementById('irParaLogin');
+        const loginContainer = document.getElementById('loginContainer');
+        const mainApp = document.getElementById('mainApp');
+        const loginForm = document.getElementById('loginForm');
+
 
         // Funções para mostrar telas
         function mostrarCadastro() {
@@ -473,12 +508,14 @@
             mainApp.style.display = '';
             cadastroContainer.style.display = 'none';
             localStorage.setItem('logado', 'true');
+            atualizarLogoutBtn(); // Atualiza a visibilidade do botão de logout
         }
         function mostrarLogin() {
             loginContainer.style.display = '';
             mainApp.style.display = 'none';
             cadastroContainer.style.display = 'none';
             localStorage.removeItem('logado');
+            atualizarLogoutBtn(); // Atualiza a visibilidade do botão de logout
         }
 
         // Usuários cadastrados (salvos no localStorage)
@@ -489,7 +526,7 @@
             localStorage.setItem('usuarios', JSON.stringify(usuarios));
         }
 
-        // Se não houver nenhum usuário cadastrado, mostra tela de cadastro
+        // Lógica inicial para exibir a tela correta (cadastro, login ou app principal)
         if (!getUsuarios().length) {
             mostrarCadastro();
         } else if (localStorage.getItem('logado') === 'true') {
@@ -497,21 +534,30 @@
         } else {
             mostrarLogin();
         }
-        // Adiciona botão para cadastrar novo usuário na tela de login
-        const btnNovoCadastro = document.createElement('button');
-        btnNovoCadastro.textContent = 'Cadastrar Novo Usuário';
-        btnNovoCadastro.type = 'button';
-        btnNovoCadastro.style = 'margin-top:10px;background:#388e3c;color:#fff;font-weight:700;border-radius:6px;padding:8px 18px;';
-        btnNovoCadastro.onclick = function() {
-            mostrarCadastro();
-        };
-        document.getElementById('loginForm').appendChild(btnNovoCadastro);
 
+        // Adiciona botão para cadastrar novo usuário na tela de login (se ainda não existir)
+        let btnNovoCadastro = document.getElementById('btnNovoCadastro');
+        if (!btnNovoCadastro) { // Verifica se o botão já existe para não duplicar
+            btnNovoCadastro = document.createElement('button');
+            btnNovoCadastro.id = 'btnNovoCadastro'; // Adiciona um ID ao botão
+            btnNovoCadastro.textContent = 'Cadastrar Novo Usuário';
+            btnNovoCadastro.type = 'button';
+            btnNovoCadastro.style = 'margin-top:10px;background:#388e3c;color:#fff;font-weight:700;border-radius:6px;padding:8px 18px;';
+            btnNovoCadastro.onclick = function() {
+                mostrarCadastro();
+            };
+            document.getElementById('loginForm').appendChild(btnNovoCadastro);
+        }
+
+        // Evento para cadastro de usuário
         cadastroForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const usuario = document.getElementById('cadastroUsuario').value.trim();
             const senha = document.getElementById('cadastroSenha').value;
-            if (!usuario || !senha) return;
+            if (!usuario || !senha) {
+                alert('Usuário e senha são obrigatórios para o cadastro.');
+                return;
+            }
             let usuarios = getUsuarios();
             if (usuarios.find(u => u.usuario === usuario)) {
                 alert('Usuário já cadastrado!');
@@ -522,12 +568,11 @@
             alert('Usuário cadastrado com sucesso! Faça login.');
             mostrarLogin();
         });
+
+        // Evento para ir para a tela de login a partir do cadastro
         irParaLogin.addEventListener('click', mostrarLogin);
 
-        // Login system
-        // Usuário e senha padrão (pode ser alterado depois)
-        const USUARIO_PADRAO = 'admin';
-        const SENHA_PADRAO = '1234';
+        // Evento para login
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const usuario = document.getElementById('loginUsuario').value.trim();
@@ -540,7 +585,8 @@
                 alert('Usuário ou senha inválidos!');
             }
         });
-        // Adiciona botão de logout
+
+        // Botão de logout
         const logoutBtn = document.createElement('button');
         logoutBtn.textContent = 'Sair';
         logoutBtn.style = 'background:#d32f2f;color:#fff;position:absolute;top:20px;right:20px;z-index:10;padding:8px 18px;border-radius:6px;font-weight:700;';
@@ -549,11 +595,16 @@
             mostrarLogin();
         };
         document.body.appendChild(logoutBtn);
-        // Exibe o botão só quando logado
+
+        // Função para atualizar a visibilidade do botão de logout
         function atualizarLogoutBtn() {
-            logoutBtn.style.display = (localStorage.getItem('logado') === 'true') ? '' : 'none';
+            logoutBtn.style.display = (localStorage.getItem('logado') === 'true') ? 'block' : 'none';
         }
-        setInterval(atualizarLogoutBtn, 500);
+        // Chamada inicial para configurar a visibilidade do botão de logout
+        atualizarLogoutBtn();
+
+        // Renderiza a tabela de mercadorias ao carregar a página
+        renderTabela();
     </script>
 </body>
 </html>
