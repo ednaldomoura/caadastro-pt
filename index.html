@@ -97,6 +97,7 @@
             object-fit: cover;
             border-radius: 6px;
             border: 1px solid #cfd8dc;
+            cursor: pointer; /* Adicionado para indicar que é clicável */
         }
         .whatsapp-link {
             display: inline-flex;
@@ -111,6 +112,51 @@
             height: 18px;
             vertical-align: middle; /* Alinha o ícone com o texto */
         }
+
+        /* Modal para a imagem ampliada */
+        .image-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+            align-items: center; /* Center content vertically */
+            justify-content: center; /* Center content horizontally */
+        }
+        .image-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .image-modal-content, #caption {
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+        @keyframes zoom {
+            from {transform:scale(0)}
+            to {transform:scale(1)}
+        }
+        .close-image-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .close-image-modal:hover,
+        .close-image-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
 
         @media (max-width: 900px) {
             .container {
@@ -233,6 +279,7 @@
             <button id="btnRelatorioCompleto" style="margin-top:18px;background:#1976d2;color:#fff;font-weight:700;border-radius:6px;padding:10px 24px;">Ver Relatório Completo</button>
         </div>
     </div>
+
     <div id="modalRelatorio" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
         <div style="background:#fff;padding:24px 18px 18px 18px;border-radius:10px;max-width:98vw;max-height:90vh;overflow:auto;position:relative;">
             <button id="fecharModalRelatorio" style="position:absolute;top:10px;right:10px;background:#d32f2f;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-weight:700;">Fechar</button>
@@ -241,10 +288,35 @@
         </div>
     </div>
 
+    <div id="imageModal" class="image-modal">
+        <span class="close-image-modal">&times;</span>
+        <img class="image-modal-content" id="img01">
+    </div>
+
     <script>
         const form = document.getElementById('mercadoriaForm');
         const tabela = document.getElementById('tabelaMercadorias').querySelector('tbody');
         let mercadorias = JSON.parse(localStorage.getItem('mercadorias') || '[]');
+
+        // Get the modal for image
+        const imageModal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("img01");
+        const closeImageModal = document.getElementsByClassName("close-image-modal")[0];
+
+        function openImageModal(src) {
+            imageModal.style.display = "flex"; // Use flex para centralizar o conteúdo
+            modalImg.src = src;
+        }
+
+        closeImageModal.onclick = function() {
+            imageModal.style.display = "none";
+        }
+
+        imageModal.onclick = function(event) {
+            if (event.target === imageModal) {
+                imageModal.style.display = "none";
+            }
+        }
 
         function renderTabela() {
             tabela.innerHTML = '';
@@ -275,19 +347,19 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td data-label="Foto">
-                        ${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto">` : ''}
+                        ${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto" onclick="openImageModal('${m.foto}')">` : ''}
                     </td>
                     <td data-label="Apartamento">${m.apartamento}</td>
                     <td data-label="Data/Hora Entrada">${new Date(m.datahora).toLocaleString('pt-BR')}</td>
                     <td data-label="Remetente">${m.remetente || ''}</td>
-                    <td data-label="Destinatário">${m.destinatario}</td>
+                    <td data-label="Destinatario">${m.destinatario}</td>
                     <td data-label="WhatsApp">${whatsappLink}</td>
                     <td data-label="Status" class="status-${m.status.toLowerCase()}" id="status-${idx}">
                         ${m.status}
                         ${m.status === 'Retirada' && m.quemRetirou ? `<br><small>Por: ${m.quemRetirou}</small>` : ''}
                         ${m.status === 'Retirada' && m.datahoraBaixa ? `<br><small>Em: ${new Date(m.datahoraBaixa).toLocaleString('pt-BR')}</small>` : ''}
                     </td>
-                    <td data-label="Observação">${m.observacao || ''}</td>
+                    <td data-label="Observacao">${m.observacao || ''}</td>
                     <td data-label="Ações">
                         <button onclick="removerMercadoria(${idx})" style="background:#d32f2f">Excluir</button>
                         ${m.status === 'Pendente' ? `<button onclick=\"darBaixaMercadoria(${idx})\" style=\"background:#388e3c;margin-left:5px;\">Dar Baixa</button>` : ''}
@@ -449,13 +521,13 @@
                 detalhes = `<h3 style='margin:10px 0 5px 0;font-size:1.1em;'>Detalhes das Retiradas</h3>`;
                 detalhes += `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
                 detalhes += `<tr style='background:#f1f5fb;'>
-                                    <th style='padding:6px 4px;'>Data/Hora Entrada</th>
-                                    <th style='padding:6px 4px;'>Apartamento</th>
-                                    <th style='padding:6px 4px;'>Destinatário</th>
-                                    <th style='padding:6px 4px;'>WhatsApp</th>
-                                    <th style='padding:6px 4px;'>Quem Retirou</th>
-                                    <th style='padding:6px 4px;'>Data/Hora Baixa</th>
-                                </tr>`;
+                                        <th style='padding:6px 4px;'>Data/Hora Entrada</th>
+                                        <th style='padding:6px 4px;'>Apartamento</th>
+                                        <th style='padding:6px 4px;'>Destinatario</th>
+                                        <th style='padding:6px 4px;'>WhatsApp</th>
+                                        <th style='padding:6px 4px;'>Quem Retirou</th>
+                                        <th style='padding:6px 4px;'>Data/Hora Baixa</th>
+                                    </tr>`;
                 retiradas.forEach(m => {
                     const formattedDataHora = new Date(m.datahora).toLocaleString('pt-BR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
@@ -493,15 +565,16 @@
         function gerarRelatorioCompleto() {
             let html = `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
             html += `<tr style='background:#f1f5fb;'>
+                <th style='padding:6px 4px;'>Foto</th>
                 <th style='padding:6px 4px;'>Data/Hora Entrada</th>
                 <th style='padding:6px 4px;'>Apartamento</th>
                 <th style='padding:6px 4px;'>Remetente</th>
-                <th style='padding:6px 4px;'>Destinatário</th>
+                <th style='padding:6px 4px;'>Destinatario</th>
                 <th style='padding:6px 4px;'>WhatsApp</th>
                 <th style='padding:6px 4px;'>Status</th>
                 <th style='padding:6px 4px;'>Quem Retirou</th>
                 <th style='padding:6px 4px;'>Data/Hora Baixa</th>
-                <th style='padding:6px 4px;'>Observação</th>
+                <th style='padding:6px 4px;'>Observacao</th>
             </tr>`;
             mercadorias.forEach(m => {
                 const formattedDataHora = new Date(m.datahora).toLocaleString('pt-BR', {
@@ -523,6 +596,7 @@
                     </a>` : '-';
 
                 html += `<tr>` +
+                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto" onclick="openImageModal('${m.foto}')">` : ''}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
                     `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.remetente || ''}</td>` +
@@ -537,6 +611,7 @@
             html += `</table>`;
             return html;
         }
+        window.openImageModal = openImageModal; // Make function globally accessible
 
         // Modal relatório completo
         const btnRelatorioCompleto = document.getElementById('btnRelatorioCompleto');
