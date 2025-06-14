@@ -97,35 +97,35 @@
             object-fit: cover;
             border-radius: 6px;
             border: 1px solid #cfd8dc;
-            cursor: pointer; /* Adicionado para indicar que é clicável */
+            cursor: pointer;
         }
         .whatsapp-link {
             display: inline-flex;
             align-items: center;
             gap: 4px;
             text-decoration: none;
-            color: #25d366; /* WhatsApp green */
+            color: #25d366;
             font-weight: bold;
         }
         .whatsapp-link img {
             width: 18px;
             height: 18px;
-            vertical-align: middle; /* Alinha o ícone com o texto */
+            vertical-align: middle;
         }
 
         /* Modal para a imagem ampliada */
         .image-modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1001; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1001;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
-            align-items: center; /* Center content vertically */
-            justify-content: center; /* Center content horizontally */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
         }
         .image-modal-content {
             margin: auto;
@@ -242,12 +242,15 @@
                 <textarea id="observacao" rows="2"></textarea>
             </div>
             <div class="form-group">
-                <label for="foto">Foto da Mercadoria</label>
-                <input type="file" id="foto" accept="image/*" capture="environment">
-                <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Tirar Foto</button>
-                <button type="button" id="switchCamera" style="margin-top:8px;background:#007bff;display:none;">Alternar Câmera</button>
+                <label for="cameraSelect">Escolher Câmera</label>
+                <select id="cameraSelect">
+                    <option value="environment">Câmera Traseira</option>
+                    <option value="user">Câmera Frontal</option>
+                </select>
+                <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Abrir Câmera</button>
                 <video id="video" width="160" height="120" autoplay style="display:none;margin-top:8px;"></video>
                 <canvas id="canvas" width="160" height="120" style="display:none;"></canvas>
+                <img id="capturedImagePreview" style="display:none; max-width:160px; max-height:120px; margin-top:8px; border: 1px solid #cfd8dc; border-radius: 6px;" alt="Pré-visualização da foto">
             </div>
 
             <div class="form-actions">
@@ -298,14 +301,13 @@
         const tabela = document.getElementById('tabelaMercadorias').querySelector('tbody');
         let mercadorias = JSON.parse(localStorage.getItem('mercadorias') || '[]');
 
-        // Get the modal for image
         const imageModal = document.getElementById("imageModal");
         const modalImg = document.getElementById("img01");
         const closeImageModal = document.getElementsByClassName("close-image-modal")[0];
 
         function openImageModal(src) {
-            imageModal.style.display = "flex"; // Use flex para centralizar o conteúdo
             modalImg.src = src;
+            imageModal.style.display = "flex";
         }
 
         closeImageModal.onclick = function() {
@@ -321,13 +323,11 @@
         function renderTabela() {
             tabela.innerHTML = '';
             mercadorias.forEach((m, idx) => {
-                // Formata a data para a mensagem do WhatsApp
                 const formattedDataHora = new Date(m.datahora).toLocaleString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: 'numeric',
                     hour: '2-digit', minute: '2-digit'
                 });
 
-                // Cria a mensagem para o WhatsApp
                 const whatsappMessage = encodeURIComponent(
                     `Olá, ${m.destinatario}! Uma nova encomenda chegou para você.\n\n` +
                     `📦 Apartamento: ${m.apartamento}\n` +
@@ -337,7 +337,6 @@
                     `Por favor, retire na portaria. Obrigado!`
                 );
 
-                // Cria um link do WhatsApp se um número estiver disponível
                 const whatsappLink = m.whatsapp ?
                     `<a href="https://wa.me/${m.whatsapp}?text=${whatsappMessage}" target="_blank" class="whatsapp-link">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/100px-WhatsApp.svg.png" alt="WhatsApp Icon">
@@ -377,87 +376,100 @@
                 renderTabela();
             }
         }
-        window.removerMercadoria = removerMercadoria; // Torna a função acessível globalmente
+        window.removerMercadoria = removerMercadoria;
 
         function darBaixaMercadoria(idx) {
             if (mercadorias[idx].status === 'Pendente') {
                 const quemRetirou = prompt('Informe quem foi que retirou a mercadoria:');
-                if (!quemRetirou || !quemRetirou.trim()) return; // Valida se o campo não está vazio
+                if (!quemRetirou || !quemRetirou.trim()) return;
                 mercadorias[idx].status = 'Retirada';
                 mercadorias[idx].quemRetirou = quemRetirou.trim();
-                mercadorias[idx].datahoraBaixa = new Date().toISOString(); // Adiciona a data e hora da baixa
+                mercadorias[idx].datahoraBaixa = new Date().toISOString();
                 localStorage.setItem('mercadorias', JSON.stringify(mercadorias));
                 renderTabela();
             }
         }
-        window.darBaixaMercadoria = darBaixaMercadoria; // Torna a função acessível globalmente
+        window.darBaixaMercadoria = darBaixaMercadoria;
 
         let stream = null;
         let fotoCapturada = '';
-        let currentFacingMode = 'environment'; // 'user' para frontal, 'environment' para traseira
 
         const abrirCameraBtn = document.getElementById('abrirCamera');
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const switchCameraBtn = document.getElementById('switchCamera'); // Referência ao novo botão
+        const capturedImagePreview = document.getElementById('capturedImagePreview');
+        const cameraSelect = document.getElementById('cameraSelect');
 
-        async function startCamera(facingMode) {
-            // Para qualquer stream de vídeo existente
+        async function startCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
+
+            const selectedFacingMode = cameraSelect.value;
+            let videoConstraints = {};
+
             try {
-                const constraints = {
-                    video: {
-                        facingMode: facingMode // Define qual câmera usar
-                    }
-                };
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                let targetDevice = null;
+                if (selectedFacingMode === 'environment') {
+                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('traseira') || device.label.toLowerCase().includes('rear')) || videoDevices.find(device => device.facingMode === 'environment');
+                } else if (selectedFacingMode === 'user') {
+                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('frontal')) || videoDevices.find(device => device.facingMode === 'user');
+                }
+
+                if (targetDevice) {
+                    videoConstraints = { deviceId: { exact: targetDevice.deviceId } };
+                } else {
+                    videoConstraints = { facingMode: selectedFacingMode };
+                }
+                
+                stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
                 video.srcObject = stream;
                 video.style.display = 'block';
+                capturedImagePreview.style.display = 'none';
                 canvas.style.display = 'none';
                 abrirCameraBtn.textContent = 'Capturar Foto';
-                abrirCameraBtn.onclick = capturePhoto; // Define o evento de clique para capturar foto
-                switchCameraBtn.style.display = 'inline-block'; // Mostra o botão de alternar câmera
+                abrirCameraBtn.onclick = capturePhoto;
             } catch (err) {
                 alert('Erro ao acessar a câmera: ' + err.message);
                 console.error('Erro ao acessar a câmera: ', err);
-                video.style.display = 'none'; // Esconde o vídeo se houver erro
-                canvas.style.display = 'none'; // Esconde o canvas se houver erro
-                switchCameraBtn.style.display = 'none'; // Esconde o botão de alternar se houver erro
-                abrirCameraBtn.textContent = 'Tentar Novamente'; // Altera o texto do botão
-                abrirCameraBtn.onclick = () => startCamera(currentFacingMode); // Permite tentar de novo
+                video.style.display = 'none';
+                capturedImagePreview.style.display = 'none';
+                canvas.style.display = 'none';
+                abrirCameraBtn.textContent = 'Tentar Novamente';
+                abrirCameraBtn.onclick = startCamera;
             }
         }
 
         function capturePhoto() {
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            canvas.style.display = 'block';
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            fotoCapturada = canvas.toDataURL('image/png');
+            
+            capturedImagePreview.src = fotoCapturada;
+            capturedImagePreview.style.display = 'block';
+
+            canvas.style.display = 'none';
             video.style.display = 'none';
+
             abrirCameraBtn.textContent = 'Tirar Outra Foto';
-            fotoCapturada = canvas.toDataURL('image/png'); // Salva a foto em base64
             if (stream) {
-                stream.getTracks().forEach(track => track.stop()); // Para o stream da câmera
+                stream.getTracks().forEach(track => track.stop());
             }
-            abrirCameraBtn.onclick = () => {
-                startCamera(currentFacingMode); // Volta a abrir a câmera no modo atual
-            };
-            switchCameraBtn.style.display = 'none'; // Esconde o botão de alternar após capturar
+            abrirCameraBtn.onclick = startCamera;
         }
 
-        // Evento para abrir a câmera
         abrirCameraBtn.addEventListener('click', function() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert('Câmera não suportada neste dispositivo.');
                 return;
             }
-            startCamera(currentFacingMode); // Inicia a câmera no modo atual
-        });
-
-        // Evento para alternar a câmera
-        switchCameraBtn.addEventListener('click', function() {
-            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
-            startCamera(currentFacingMode);
+            startCamera();
         });
 
         form.addEventListener('submit', function(e) {
@@ -469,40 +481,32 @@
             const whatsapp = document.getElementById('whatsapp').value.trim();
             const status = document.getElementById('status').value;
             const observacao = document.getElementById('observacao').value.trim();
-            const fotoInput = document.getElementById('foto');
-            let fotoBase64 = '';
-
+            
             if (!apartamento || !datahora || !remetente || !destinatario || !status) {
                 alert('Por favor, preencha todos os campos obrigatórios (Apartamento, Data/Hora, Remetente, Destinatário, Status).');
                 return;
             }
 
-            const adicionar = (fotoBase64) => {
-                mercadorias.push({ apartamento, datahora, remetente, destinatario, whatsapp, status, observacao, foto: fotoBase64, datahoraBaixa: null });
+            const adicionar = (fotoData) => {
+                mercadorias.push({ apartamento, datahora, remetente, destinatario, whatsapp, status, observacao, foto: fotoData, datahoraBaixa: null });
                 localStorage.setItem('mercadorias', JSON.stringify(mercadorias));
                 renderTabela();
                 form.reset();
                 canvas.style.display = 'none';
                 document.getElementById('video').style.display = 'none';
+                capturedImagePreview.style.display = 'none';
                 fotoCapturada = '';
-                abrirCameraBtn.textContent = 'Tirar Foto';
-                switchCameraBtn.style.display = 'none';
+                abrirCameraBtn.textContent = 'Abrir Câmera';
+                abrirCameraBtn.onclick = startCamera;
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                 }
             };
 
-            // Prioridade: foto da câmera capturada > arquivo selecionado > nenhuma
             if (fotoCapturada) {
                 adicionar(fotoCapturada);
-            } else if (fotoInput.files && fotoInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    adicionar(evt.target.result);
-                };
-                reader.readAsDataURL(fotoInput.files[0]);
             } else {
-                adicionar('');
+                adicionar(''); // Add without photo if none is captured
             }
         });
 
@@ -514,20 +518,19 @@
             document.getElementById('relatorioSaidas').textContent = `Saídas: ${saidas}`;
             document.getElementById('relatorioCancelados').textContent = `Cancelados: ${cancelados}`;
 
-            // Relatório detalhado de retiradas
             const retiradas = mercadorias.filter(m => m.status === 'Retirada');
             let detalhes = '';
             if (retiradas.length) {
                 detalhes = `<h3 style='margin:10px 0 5px 0;font-size:1.1em;'>Detalhes das Retiradas</h3>`;
                 detalhes += `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
                 detalhes += `<tr style='background:#f1f5fb;'>
-                                        <th style='padding:6px 4px;'>Data/Hora Entrada</th>
-                                        <th style='padding:6px 4px;'>Apartamento</th>
-                                        <th style='padding:6px 4px;'>Destinatario</th>
-                                        <th style='padding:6px 4px;'>WhatsApp</th>
-                                        <th style='padding:6px 4px;'>Quem Retirou</th>
-                                        <th style='padding:6px 4px;'>Data/Hora Baixa</th>
-                                    </tr>`;
+                                    <th style='padding:6px 4px;'>Data/Hora Entrada</th>
+                                    <th style='padding:6px 4px;'>Apartamento</th>
+                                    <th style='padding:6px 4px;'>Destinatario</th>
+                                    <th style='padding:6px 4px;'>WhatsApp</th>
+                                    <th style='padding:6px 4px;'>Quem Retirou</th>
+                                    <th style='padding:6px 4px;'>Data/Hora Baixa</th>
+                                </tr>`;
                 retiradas.forEach(m => {
                     const formattedDataHora = new Date(m.datahora).toLocaleString('pt-BR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
@@ -561,7 +564,6 @@
             document.getElementById('relatorioRetiradasDetalhes').innerHTML = detalhes;
         }
 
-        // Função para gerar relatório completo
         function gerarRelatorioCompleto() {
             let html = `<table style='width:100%;border-collapse:collapse;font-size:0.98em;'>`;
             html += `<tr style='background:#f1f5fb;'>
@@ -611,9 +613,8 @@
             html += `</table>`;
             return html;
         }
-        window.openImageModal = openImageModal; // Make function globally accessible
+        window.openImageModal = openImageModal;
 
-        // Modal relatório completo
         const btnRelatorioCompleto = document.getElementById('btnRelatorioCompleto');
         const modalRelatorio = document.getElementById('modalRelatorio');
         const fecharModalRelatorio = document.getElementById('fecharModalRelatorio');
@@ -627,7 +628,6 @@
             modalRelatorio.style.display = 'none';
         });
 
-        // Renderiza a tabela de mercadorias ao carregar a página
         renderTabela();
     </script>
 </body>
