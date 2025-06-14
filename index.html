@@ -11,106 +11,172 @@
             background: #f4f6fb;
             margin: 0;
             padding: 0;
+            line-height: 1.6;
+            color: #333;
         }
         .container {
-            max-width: 900px;
-            margin: 40px auto;
+            max-width: 960px; /* Aumentei um pouco a largura máxima para computadores */
+            margin: 20px auto; /* Margem ajustada para melhor visualização em telas maiores */
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 32px 40px 40px 40px;
+            padding: 30px; /* Padding ajustado */
+            box-sizing: border-box; /* Garante que padding não adicione largura extra */
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #2d3a4b;
-            margin-bottom: 32px;
+            margin-bottom: 25px;
         }
         form {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 32px;
+            gap: 15px; /* Reduzi um pouco o espaçamento para otimizar espaço */
+            margin-bottom: 25px;
         }
         .form-group {
-            flex: 1 1 200px;
+            flex: 1 1 calc(50% - 15px); /* Dois itens por linha em telas maiores, considerando o gap */
             display: flex;
             flex-direction: column;
         }
+        @media (min-width: 768px) { /* Em telas maiores que 768px, alguns campos ocupam 1/3 */
+            .form-group:nth-child(1), /* Apartamento */
+            .form-group:nth-child(2), /* Data e Hora */
+            .form-group:nth-child(3), /* Remetente */
+            .form-group:nth-child(4), /* Destinatário */
+            .form-group:nth-child(5), /* WhatsApp */
+            .form-group:nth-child(6) { /* Status */
+                flex: 1 1 calc(33.333% - 10px); /* Ajustado para 3 colunas em telas maiores */
+            }
+            .form-group:nth-child(7) { /* Observação */
+                flex: 1 1 100%; /* Observação ocupa a largura total */
+            }
+             .form-group:nth-child(8) { /* Grupo da Câmera */
+                flex: 1 1 100%; /* Câmera ocupa a largura total */
+            }
+        }
+
         label {
             font-weight: 700;
             margin-bottom: 6px;
             color: #2d3a4b;
+            font-size: 0.95rem;
         }
         input, select, textarea {
-            padding: 8px 10px;
+            padding: 10px 12px; /* Aumentei um pouco o padding */
             border: 1px solid #cfd8dc;
-            border-radius: 6px;
+            border-radius: 8px; /* Bordas mais arredondadas */
             font-size: 1rem;
             background: #f9fafb;
+            box-sizing: border-box; /* Garante que padding não adicione largura extra */
         }
         textarea {
             resize: vertical;
+            min-height: 60px; /* Altura mínima para observação */
         }
         .form-actions {
             flex-basis: 100%;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            margin-top: 15px;
         }
         button {
             background: #1976d2;
             color: #fff;
             border: none;
-            padding: 10px 24px;
-            border-radius: 6px;
+            padding: 12px 28px; /* Aumentei o padding do botão */
+            border-radius: 8px; /* Bordas mais arredondadas */
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s ease, transform 0.1s ease; /* Transição para efeito de clique */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         button:hover {
             background: #125ea7;
+            transform: translateY(-1px); /* Pequeno efeito de elevação */
+        }
+        button:active {
+            transform: translateY(0); /* Efeito de "clique" */
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 16px;
+            margin-top: 25px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden; /* Garante que as bordas arredondadas funcionem na tabela */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         th, td {
-            padding: 10px 8px;
+            padding: 12px 15px; /* Aumentei o padding das células */
             border-bottom: 1px solid #e0e0e0;
             text-align: left;
+            font-size: 0.92rem;
         }
         th {
             background: #f1f5fb;
             color: #1976d2;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         tr:last-child td {
             border-bottom: none;
+        }
+        tr:hover {
+            background-color: #f7f9fc;
         }
         .status-pendente { color: #ff9800; font-weight: bold; }
         .status-retirada { color: #388e3c; font-weight: bold; }
         .status-cancelado { color: #d32f2f; font-weight: bold; }
         .foto-thumb {
-            width: 60px;
-            height: 60px;
+            width: 50px; /* Tamanho da thumb ajustado */
+            height: 50px;
             object-fit: cover;
             border-radius: 6px;
             border: 1px solid #cfd8dc;
             cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .foto-thumb:hover {
+            transform: scale(1.05);
         }
         .whatsapp-link {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             text-decoration: none;
             color: #25d366;
             font-weight: bold;
+            transition: color 0.2s ease;
+        }
+        .whatsapp-link:hover {
+            color: #1da851;
         }
         .whatsapp-link img {
-            width: 18px;
-            height: 18px;
+            width: 20px; /* Ícone do WhatsApp um pouco maior */
+            height: 20px;
             vertical-align: middle;
+        }
+
+        /* Seção de Câmera */
+        #video, #canvas, #capturedImagePreview {
+            border: 1px solid #cfd8dc;
+            border-radius: 8px;
+            background: #e9eef5;
+            display: block; /* Garante que ocupem a largura disponível */
+            max-width: 100%; /* Máxima largura da div pai */
+            height: auto; /* Mantém proporção */
+            margin-top: 10px;
+        }
+        #abrirCamera {
+            background: #388e3c;
+        }
+        #abrirCamera:hover {
+            background: #2b7a31;
         }
 
         /* Modal para a imagem ampliada */
@@ -124,6 +190,7 @@
             height: 100%;
             overflow: auto;
             background-color: rgba(0,0,0,0.9);
+            display: flex; /* Usar flexbox para centralizar */
             align-items: center;
             justify-content: center;
         }
@@ -132,75 +199,202 @@
             display: block;
             max-width: 90%;
             max-height: 90%;
-        }
-        .image-modal-content, #caption {
-            animation-name: zoom;
-            animation-duration: 0.6s;
-        }
-        @keyframes zoom {
-            from {transform:scale(0)}
-            to {transform:scale(1)}
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
         }
         .close-image-modal {
             position: absolute;
-            top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 45px;
             font-weight: bold;
             transition: 0.3s;
         }
         .close-image-modal:hover,
         .close-image-modal:focus {
-            color: #bbb;
+            color: #ccc;
             text-decoration: none;
             cursor: pointer;
         }
 
+        /* Relatório */
+        .relatorio-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 30px;
+        }
+        .relatorio-section div {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        #btnRelatorioCompleto {
+            background: #1976d2;
+            margin-top: 20px;
+        }
 
-        @media (max-width: 900px) {
+        /* Modal do Relatório Completo */
+        #modalRelatorio {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px; /* Padding para evitar que o modal toque as bordas */
+            box-sizing: border-box;
+        }
+        #modalRelatorio > div { /* Conteúdo do modal */
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 95vw; /* Mais adaptável em telas menores */
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+        }
+        #fecharModalRelatorio {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background:#d32f2f;
+            color:#fff;
+            border:none;
+            border-radius:50%; /* Botão circular */
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            font-weight:700;
+            cursor:pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.2s ease;
+        }
+        #fecharModalRelatorio:hover {
+            background:#a72020;
+        }
+        #tabelaRelatorioCompleto table {
+            margin-top: 15px;
+        }
+
+        /* --- Media Queries para Responsividade --- */
+
+        /* Telas menores que 768px (Celulares) */
+        @media (max-width: 767px) {
             .container {
-                padding: 10px;
-                max-width: 100vw;
+                margin: 15px;
+                padding: 15px;
             }
-            form {
-                flex-direction: column;
+            h1, h2 {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+            .form-group {
+                flex: 1 1 100%; /* Um item por linha */
+                margin-bottom: 10px;
+            }
+            .form-actions {
+                flex-direction: column; /* Botões um abaixo do outro */
                 gap: 10px;
+            }
+            button {
+                width: 100%;
+                padding: 10px 15px;
             }
             table, thead, tbody, th, td, tr {
                 display: block;
                 width: 100%;
             }
             thead {
-                display: none;
+                display: none; /* Esconde o cabeçalho original da tabela */
             }
             tr {
-                margin-bottom: 18px;
+                margin-bottom: 15px;
                 background: #f9fafb;
                 border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-                padding: 8px 0;
+                padding: 10px;
             }
             td {
                 border: none;
                 position: relative;
-                padding-left: 50%;
-                min-height: 36px;
-                box-sizing: border-box;
+                padding-left: 50%; /* Espaço para o "label" */
+                text-align: right; /* Alinha o conteúdo à direita */
+                font-size: 0.9rem;
+                min-height: 28px; /* Altura mínima para as células */
+                display: flex; /* Usar flexbox para alinhar label e conteúdo */
+                align-items: center;
+                justify-content: space-between; /* Espaça label e conteúdo */
             }
             td:before {
+                content: attr(data-label); /* Mostra o atributo data-label como um cabeçalho */
                 position: absolute;
-                top: 10px;
                 left: 10px;
                 width: 45%;
-                white-space: nowrap;
                 font-weight: bold;
                 color: #1976d2;
-                content: attr(data-label);
+                text-align: left;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .foto-thumb {
-                width: 100px;
-                height: 100px;
+                width: 80px; /* Thumb maior em celular */
+                height: 80px;
+                display: block;
+                margin: 0 auto; /* Centraliza a foto */
+            }
+            .whatsapp-link {
+                justify-content: flex-end; /* Alinha o link WhatsApp à direita */
+                text-align: right;
+                width: 100%;
+            }
+            #modalRelatorio > div {
+                padding: 15px;
+            }
+            #fecharModalRelatorio {
+                top: 10px;
+                right: 10px;
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+            #tabelaRelatorioCompleto th, #tabelaRelatorioCompleto td {
+                padding: 8px 10px;
+            }
+            #tabelaRelatorioCompleto td:before {
+                 left: 5px; /* Ajusta a posição do label no modal */
+                 width: 40%;
+            }
+        }
+
+        /* Telas de tablet (entre 768px e 992px) */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .container {
+                margin: 30px auto;
+                padding: 25px;
+            }
+            .form-group {
+                flex: 1 1 calc(50% - 10px); /* 2 colunas */
+            }
+            .form-group:nth-child(7), /* Observação */
+            .form-group:nth-child(8) { /* Grupo da Câmera */
+                flex: 1 1 100%;
+            }
+            th, td {
+                padding: 10px 12px;
             }
         }
     </style>
@@ -247,10 +441,10 @@
                     <option value="environment">Câmera Traseira</option>
                     <option value="user">Câmera Frontal</option>
                 </select>
-                <button type="button" id="abrirCamera" style="margin-top:8px;background:#388e3c">Abrir Câmera</button>
-                <video id="video" width="160" height="120" autoplay style="display:none;margin-top:8px;"></video>
-                <canvas id="canvas" width="160" height="120" style="display:none;"></canvas>
-                <img id="capturedImagePreview" style="display:none; max-width:160px; max-height:120px; margin-top:8px; border: 1px solid #cfd8dc; border-radius: 6px;" alt="Pré-visualização da foto">
+                <button type="button" id="abrirCamera">Abrir Câmera</button>
+                <video id="video" width="320" height="240" autoplay style="display:none;"></video>
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+                <img id="capturedImagePreview" style="display:none; max-width:320px; max-height:240px;" alt="Pré-visualização da foto">
             </div>
 
             <div class="form-actions">
@@ -273,19 +467,19 @@
             </thead>
             <tbody></tbody>
         </table>
-        <div style="margin-top:32px;">
+        <div class="relatorio-section">
             <h2>Relatório</h2>
             <div id="relatorioEntradas">Entradas: 0</div>
             <div id="relatorioSaidas">Saídas: 0</div>
             <div id="relatorioCancelados">Cancelados: 0</div>
             <div id="relatorioRetiradasDetalhes" style="margin-top:16px;"></div>
-            <button id="btnRelatorioCompleto" style="margin-top:18px;background:#1976d2;color:#fff;font-weight:700;border-radius:6px;padding:10px 24px;">Ver Relatório Completo</button>
+            <button id="btnRelatorioCompleto">Ver Relatório Completo</button>
         </div>
     </div>
 
-    <div id="modalRelatorio" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
-        <div style="background:#fff;padding:24px 18px 18px 18px;border-radius:10px;max-width:98vw;max-height:90vh;overflow:auto;position:relative;">
-            <button id="fecharModalRelatorio" style="position:absolute;top:10px;right:10px;background:#d32f2f;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-weight:700;">Fechar</button>
+    <div id="modalRelatorio">
+        <div>
+            <button id="fecharModalRelatorio">&times;</button>
             <h2 style="margin-top:0;">Relatório Completo de Mercadorias</h2>
             <div id="tabelaRelatorioCompleto"></div>
         </div>
@@ -360,8 +554,8 @@
                     </td>
                     <td data-label="Observacao">${m.observacao || ''}</td>
                     <td data-label="Ações">
-                        <button onclick="removerMercadoria(${idx})" style="background:#d32f2f">Excluir</button>
-                        ${m.status === 'Pendente' ? `<button onclick=\"darBaixaMercadoria(${idx})\" style=\"background:#388e3c;margin-left:5px;\">Dar Baixa</button>` : ''}
+                        <button onclick="removerMercadoria(${idx})" style="background:#d32f2f; padding: 8px 12px; font-size:0.85rem;">Excluir</button>
+                        ${m.status === 'Pendente' ? `<button onclick=\"darBaixaMercadoria(${idx})\" style=\"background:#388e3c; margin-left:5px; padding: 8px 12px; font-size:0.85rem;\">Dar Baixa</button>` : ''}
                     </td>
                 `;
                 tabela.appendChild(tr);
@@ -406,34 +600,56 @@
             }
 
             const selectedFacingMode = cameraSelect.value;
-            let videoConstraints = {};
+            let videoConstraints = {
+                width: { ideal: 640 }, /* Aumentei a resolução ideal para melhor qualidade */
+                height: { ideal: 480 },
+                facingMode: selectedFacingMode
+            };
 
             try {
+                // Tenta encontrar o dispositivo específico primeiro
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
                 let targetDevice = null;
+
                 if (selectedFacingMode === 'environment') {
-                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('traseira') || device.label.toLowerCase().includes('rear')) || videoDevices.find(device => device.facingMode === 'environment');
+                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('traseira') || device.label.toLowerCase().includes('rear')) || videoDevices.find(device => device.label.includes('environment'));
                 } else if (selectedFacingMode === 'user') {
-                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('frontal')) || videoDevices.find(device => device.facingMode === 'user');
+                    targetDevice = videoDevices.find(device => device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('frontal')) || videoDevices.find(device => device.label.includes('user'));
                 }
 
                 if (targetDevice) {
-                    videoConstraints = { deviceId: { exact: targetDevice.deviceId } };
-                } else {
-                    videoConstraints = { facingMode: selectedFacingMode };
+                    videoConstraints.deviceId = { exact: targetDevice.deviceId };
+                    delete videoConstraints.facingMode; // Remove facingMode se deviceId for usado
                 }
                 
                 stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
                 video.srcObject = stream;
-                video.style.display = 'block';
-                capturedImagePreview.style.display = 'none';
-                canvas.style.display = 'none';
-                abrirCameraBtn.textContent = 'Capturar Foto';
-                abrirCameraBtn.onclick = capturePhoto;
+                video.style.display = 'block'; // Show video feed
+                capturedImagePreview.style.display = 'none'; // Hide preview when camera is active
+                canvas.style.display = 'none'; // Hide canvas when camera is active
+
+                // Listener para garantir que as dimensões do vídeo estejam disponíveis
+                video.onloadeddata = () => {
+                    // Define o tamanho do canvas com as dimensões reais do vídeo para evitar imagem escura
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    video.play(); // Garante que o vídeo está rodando
+                    abrirCameraBtn.textContent = 'Capturar Foto';
+                    abrirCameraBtn.onclick = capturePhoto;
+                };
+
+                // Se o vídeo já estiver carregado (pode acontecer em algumas execuções rápidas)
+                if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    video.play();
+                    abrirCameraBtn.textContent = 'Capturar Foto';
+                    abrirCameraBtn.onclick = capturePhoto;
+                }
+                
             } catch (err) {
-                alert('Erro ao acessar a câmera: ' + err.message);
+                alert('Erro ao acessar a câmera: ' + err.message + '\nPor favor, verifique se a câmera está permitida e tente novamente.');
                 console.error('Erro ao acessar a câmera: ', err);
                 video.style.display = 'none';
                 capturedImagePreview.style.display = 'none';
@@ -444,7 +660,13 @@
         }
 
         function capturePhoto() {
+            if (!video.srcObject || video.videoWidth === 0 || video.videoHeight === 0) {
+                alert('A câmera não está ativa ou não conseguiu carregar as dimensões do vídeo. Por favor, aguarde alguns segundos e tente novamente.');
+                return;
+            }
+
             const context = canvas.getContext('2d');
+            // Garante que o canvas tenha as dimensões corretas do vídeo
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -454,21 +676,24 @@
             capturedImagePreview.src = fotoCapturada;
             capturedImagePreview.style.display = 'block';
 
-            canvas.style.display = 'none';
             video.style.display = 'none';
+            canvas.style.display = 'none';
 
-            abrirCameraBtn.textContent = 'Tirar Outra Foto';
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
-            abrirCameraBtn.onclick = startCamera;
+
+            abrirCameraBtn.textContent = 'Tirar Outra Foto';
+            abrirCameraBtn.onclick = startCamera; // Prepara para próxima captura
         }
 
         abrirCameraBtn.addEventListener('click', function() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert('Câmera não suportada neste dispositivo.');
+                alert('Câmera não suportada neste dispositivo/navegador.');
                 return;
             }
+            capturedImagePreview.style.display = 'none';
+            video.style.display = 'none';
             startCamera();
         });
 
@@ -495,9 +720,9 @@
                 canvas.style.display = 'none';
                 document.getElementById('video').style.display = 'none';
                 capturedImagePreview.style.display = 'none';
-                fotoCapturada = '';
+                fotoCapturada = ''; // Limpa a foto capturada
                 abrirCameraBtn.textContent = 'Abrir Câmera';
-                abrirCameraBtn.onclick = startCamera;
+                abrirCameraBtn.onclick = startCamera; // Reseta o comportamento do botão
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                 }
@@ -506,7 +731,8 @@
             if (fotoCapturada) {
                 adicionar(fotoCapturada);
             } else {
-                adicionar(''); // Add without photo if none is captured
+                // Se nenhuma foto foi capturada, adiciona a mercadoria sem foto
+                adicionar(''); 
             }
         });
 
@@ -551,12 +777,12 @@
                         </a>` : '-';
 
                     detalhes += `<tr>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${whatsappLinkRelatorio}</td>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
-                        `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
+                        `<td data-label="Data/Hora Entrada" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
+                        `<td data-label="Apartamento" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
+                        `<td data-label="Destinatário" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
+                        `<td data-label="WhatsApp" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${whatsappLinkRelatorio}</td>` +
+                        `<td data-label="Quem Retirou" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
+                        `<td data-label="Data/Hora Baixa" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
                         `</tr>`;
                 });
                 detalhes += `</table>`;
@@ -598,16 +824,16 @@
                     </a>` : '-';
 
                 html += `<tr>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto" onclick="openImageModal('${m.foto}')">` : ''}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.remetente || ''}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${whatsappLinkFullReport}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.status}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
-                    `<td style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.observacao || ''}</td>` +
+                    `<td data-label="Foto" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.foto ? `<img src="${m.foto}" class="foto-thumb" alt="Foto" onclick="openImageModal('${m.foto}')">` : ''}</td>` +
+                    `<td data-label="Data/Hora Entrada" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${new Date(m.datahora).toLocaleString('pt-BR')}</td>` +
+                    `<td data-label="Apartamento" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.apartamento}</td>` +
+                    `<td data-label="Remetente" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.remetente || ''}</td>` +
+                    `<td data-label="Destinatário" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.destinatario}</td>` +
+                    `<td data-label="WhatsApp" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${whatsappLinkFullReport}</td>` +
+                    `<td data-label="Status" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.status}</td>` +
+                    `<td data-label="Quem Retirou" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.quemRetirou || '-'}</td>` +
+                    `<td data-label="Data/Hora Baixa" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.datahoraBaixa ? new Date(m.datahoraBaixa).toLocaleString('pt-BR') : '-'}</td>` +
+                    `<td data-label="Observação" style='padding:6px 4px;border-bottom:1px solid #e0e0e0;'>${m.observacao || ''}</td>` +
                     `</tr>`;
             });
             html += `</table>`;
@@ -628,6 +854,7 @@
             modalRelatorio.style.display = 'none';
         });
 
+        // Inicializa a tabela ao carregar a página
         renderTabela();
     </script>
 </body>
